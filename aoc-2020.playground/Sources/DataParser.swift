@@ -31,6 +31,7 @@ public struct DataParser<T: StringInitable> {
     ///
     public func parseLines(fileName: String) throws -> [T] {
         return try loadDataString(from: fileName)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
             .split(separator: "\n")
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .compactMap { T($0) }
@@ -40,6 +41,7 @@ public struct DataParser<T: StringInitable> {
     ///
     public func parseCSV(fileName: String) throws -> [T] {
         return try loadDataString(from: fileName)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
             .split(separator: ",")
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .compactMap { T($0) }
@@ -49,6 +51,7 @@ public struct DataParser<T: StringInitable> {
     ///
     public func parseCSVLines(fileName: String) throws -> [[T]] {
         return try loadDataString(from: fileName)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
             .split(separator: "\n")
             .map { line in
                 line
