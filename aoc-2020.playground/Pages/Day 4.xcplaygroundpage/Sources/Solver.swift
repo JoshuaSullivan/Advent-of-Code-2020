@@ -1,11 +1,5 @@
 import Foundation
 
-public struct Year {
-    let value: Int
-    let validRange: ClosedRange<Int>
-
-    var isValid: Bool { validRange.contains(value) }
-}
 public struct Height {
     let value: Int
     let unit: String
@@ -41,81 +35,97 @@ public enum EyeColor: String {
 
 public struct Passport: StringInitable {
 
-    enum Field: StringInitable {
-        case byr(Year)
-        case iyr(Year)
-        case eyr(Year)
-        case hgt(Height)
-        case hcl(HairColor)
-        case ecl(EyeColor)
-        case pid(String)
+    struct Field: StringInitable {
 
-        var identifier: String {
-            switch self {
-            case .byr: return "byr"
-            case .iyr: return "iyr"
-            case .eyr: return "eyr"
-            case .hgt: return "hgt"
-            case .hcl: return "hcl"
-            case .ecl: return "ecl"
-            case .pid: return "pid"
-            }
+        enum FieldType: String {
+            case byr
+            case iyr
+            case eyr
+            case hgt
+            case hcl
+            case ecl
+            case pid
+            case cid
         }
 
+        var fieldType: FieldType
+        var value: String
+
         init?(_ string: String) {
-            let parts = string.split(separator: ":")
-            let rawValue = String(parts[1])
-            switch parts[0] {
-                case "byr":
-                    guard let value = Int(rawValue) else { return nil }
-                    self = Field.byr(Year(value: value, validRange: 1920...2002))
-            case "iyr":
-                guard let value = Int(rawValue) else { return nil }
-                self = Field.byr(Year(value: value, validRange: 2010...2020))
-            case "eyr":
-                guard let value = Int(rawValue) else { return nil }
-                self = Field.byr(Year(value: value, validRange: 2020...2030))
-            case "hgt":
-                guard let value = Int(rawValue.dropLast(2)) else { return nil }
-                let unit = String(rawValue.suffix(2))
-                self = Field.hgt(Height(value: value, unit: unit))
-            case "hcl":
-                self = Field.hcl(HairColor(rawValue: rawValue))
-            case "ecl":
-                guard let eyeColor = EyeColor(rawValue: rawValue) else { return nil }
-                self = Field.ecl(eyeColor)
-            case "pid":
-                self = Field.pid(rawValue)
-            default:
-                return nil
+            let parts = string.split(separator: ":").map { String($0) }
+            guard let fieldType = FieldType(rawValue: parts[0]) else { return nil }
+            self.fieldType = fieldType
+            self.value = parts[1]
+        }
+
+        var isValid: Bool {
+            switch self.fieldType {
+            case .byr:
+                guard let intValue = Int(value) else { return false }
+                return (1920...2002).contains(intValue)
+            case .iyr:
+                guard let intValue = Int(value) else { return false }
+                return (2010...2020).contains(intValue)
+            case .eyr:
+                guard let intValue = Int(value) else { return false }
+                return (2020...2030).contains(intValue)
+            case .hgt:
+                guard let intValue = Int(value.dropLast(2)) else { return false }
+                switch value.suffix(2) {
+                case "cm": return (150...193).contains(intValue)
+                case "in": return (59...76).contains(intValue)
+                default: return false
+                }
+            case .hcl:
+                let nonHexChars = CharacterSet(charactersIn: "1234567890abcdef").inverted
+                return
+                    value.count == 7
+                    && value.first == "#"
+                    && value.dropFirst().lowercased().rangeOfCharacter(from: nonHexChars) == nil
+            case .ecl:
+                return ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"].contains(value)
+            case .pid:
+                let nonNumericChars = CharacterSet(charactersIn: "1234567890").inverted
+                return value.count == 9 && value.rangeOfCharacter(from: nonNumericChars) == nil
+            case .cid:
+                return true
             }
         }
     }
 
-    public static let requiredFields = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"]
-    public static let optionalFields = ["cid"]
 
     let fields: [Field]
 
     var hasRequiredFields: Bool {
-        let fieldIds = fields.map { $0.identifier }
-        return Passport.requiredFields.allSatisfy { fieldIds.contains($0) }
+
+        let requiredFields: [Field.FieldType] = [.byr, .iyr, .eyr, .hgt, .hcl, .ecl, .pid]
+        let optionalFields: [Field.FieldType] = [.cid]
+
+        let fieldIds = fields.map { $0.fieldType }
+        return requiredFields.allSatisfy { fieldIds.contains($0) }
     }
 
     var isValid: Bool {
-        
+        hasRequiredFields && fields.allSatisfy(\.isValid)
     }
 
     public init?(_ string: String) {
         fields = string
             .split(separator: " ")
             .compactMap { Field.init(String($0)) }
-        print(fields)
     }
 }
 
 public struct Solver {
     public static func solveFirst(input: [Passport]) -> Int {
-        return input.filter( \.hasRequiredFields ).count
+        return input
+            .filter(\.hasRequiredFields)
+            .count
+    }
+
+    public static func solveSecond(input: [Passport]) -> Int {
+        return input
+            .filter(\.isValid)
+            .count
     }
 }

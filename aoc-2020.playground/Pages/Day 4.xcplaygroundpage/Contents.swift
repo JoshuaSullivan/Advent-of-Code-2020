@@ -4,9 +4,9 @@
 
 import Foundation
 
-guard let passports = try? DataParser<Passport>().parseDoubleNewlineWithSpaces(fileName: "testInput") else {
+guard let passports = try? DataParser<Passport>().parseDoubleNewlineWithSpaces(fileName: "input") else {
     fatalError("Couldn't read input.")
 }
 
-print("Found \(passports.count) passports.")
-print("Valid passports: \(Solver.solveFirst(input: passports))")
+print("First: \(Solver.solveFirst(input: passports))")
+print("Second: \(Solver.solveSecond(input: passports))")
