@@ -61,6 +61,17 @@ public struct DataParser<T: StringInitable> {
             }
     }
 
+    /// Breaks up the data on double-newlines. Single newlines are converted to spaces.
+    ///
+    public func parseDoubleNewlineWithSpaces(fileName: String) throws -> [T] {
+        return try loadDataString(from: fileName)
+            .replacingOccurrences(of: "\n\n", with: "❤️")
+            .replacingOccurrences(of: "\n", with: " ")
+            .split(separator: "❤️")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .compactMap { T($0) }
+    }
+
     /// Attempt to load the input file from the Resources folder.
     ///
     private func loadDataString(from fileName: String) throws -> String {
