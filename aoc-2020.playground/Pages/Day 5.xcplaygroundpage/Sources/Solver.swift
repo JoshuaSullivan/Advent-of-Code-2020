@@ -1,19 +1,23 @@
 import Foundation
 
-extension String {
-    var asBinary: Int {
-        strtol(self, nil, 2) // Thanks, cstdlib!
-    }
-}
+// No longer needed, but kept for future reference.
+
+//extension String {
+//    var asBinary: Int {
+//        strtol(self, nil, 2) // Thanks, cstdlib!
+//    }
+//}
 
 public struct BoardingPass: StringInitable, Comparable {
     let seatId: Int
 
     public init?(_ string: String) {
-        seatId = string
-            .map { ($0 == "F" || $0 == "L") ? "0" : "1" }
-            .joined()
-            .asBinary
+        // 1. Iterate through the characters of the input string with reduce.
+        // 2. For each character, determine if it's a 0 or a 1 (F & L = 0, B & R = 1)
+        // 3. Take whatever previous value we had and bit-shift it one to the left to "make room".
+        // 4. Insert the new 0 or 1 in the right-most bit using bitwise OR.
+
+        seatId = string.reduce(0) { ($0 << 1) | (($1 == "F" || $1 == "L") ? 0 : 1) }
     }
 
     public var row: Int {
@@ -23,7 +27,6 @@ public struct BoardingPass: StringInitable, Comparable {
     public var col: Int {
         seatId & 0x7
     }
-
 
     public static func < (lhs: BoardingPass, rhs: BoardingPass) -> Bool { lhs.seatId < rhs.seatId }
 }
