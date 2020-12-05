@@ -7,31 +7,23 @@ extension String {
 }
 
 public struct BoardingPass: StringInitable, Comparable {
-    let string: String
+    let seatId: Int
 
     public init?(_ string: String) {
-        self.string = string
+        seatId = string
+            .map { ($0 == "F" || $0 == "L") ? "0" : "1" }
+            .joined()
+            .asBinary
     }
 
     public var row: Int {
-        string
-            .prefix(7)
-            .map { $0 == "F" ? "0" : "1" }
-            .joined()
-            .asBinary
+        (seatId & (0x7FFF << 3)) >> 3
     }
 
     public var col: Int {
-        string
-            .suffix(3)
-            .map { $0 == "L" ? "0" : "1" }
-            .joined()
-            .asBinary
+        seatId & 0x7
     }
 
-    var seatId: Int {
-        return row * 8 + col
-    }
 
     public static func < (lhs: BoardingPass, rhs: BoardingPass) -> Bool { lhs.seatId < rhs.seatId }
 }

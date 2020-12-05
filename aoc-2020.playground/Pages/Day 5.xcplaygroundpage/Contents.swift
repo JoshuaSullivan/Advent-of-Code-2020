@@ -9,4 +9,4 @@ guard let input = try? DataParser<BoardingPass>().parseLines(fileName: "input") 
 }
 
 print("First: \(Solver.solveFirst(input))")
-let secondId = Solver.solveSecond(input)
+print("Second: \(Solver.solveSecond(input))")
