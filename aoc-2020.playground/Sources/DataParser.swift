@@ -72,6 +72,13 @@ public struct DataParser<T: StringInitable> {
             .compactMap { T($0) }
     }
 
+    public func parseDoubleNewlineGroupsOfLines(fileName: String) throws -> [[T]] {
+        return try loadDataString(from: fileName)
+            .replacingOccurrences(of: "\n\n", with: "❤️")
+            .split(separator: "❤️")
+            .map { $0.split(separator: "\n").compactMap { T(String($0)) } }
+    }
+
     /// Attempt to load the input file from the Resources folder.
     ///
     private func loadDataString(from fileName: String) throws -> String {
