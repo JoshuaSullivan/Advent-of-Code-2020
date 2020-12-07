@@ -8,4 +8,5 @@ guard let input = try? DataParser<BagRule>().parseLines(fileName: "input") else 
     fatalError("Could not read input.")
 }
 
-print(input.map(\.description).joined(separator: "\n"))
+print("First: \(Solver.solveFirst(input: input, key: "shiny gold"))")
+print("Second: \(Solver.solveSecond(input: input, key: "shiny gold"))")

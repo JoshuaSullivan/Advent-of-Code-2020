@@ -1,8 +1,8 @@
 import Foundation
 
-public struct BagRule: StringInitable, CustomStringConvertible {
+public struct BagRule: StringInitable, Hashable, Equatable, CustomStringConvertible {
 
-    public struct InnerBag: StringInitable, CustomStringConvertible {
+    public struct InnerBag: StringInitable, Hashable, Equatable, CustomStringConvertible {
         let count: Int
         let color: String
 
@@ -44,14 +44,41 @@ public struct BagRule: StringInitable, CustomStringConvertible {
             return "\(outerBagColor) bags contain \(innerBags.map(\.description).joined(separator: ", "))."
         }
     }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(outerBagColor)
+    }
+
+    public static func == (lhs: BagRule, rhs: BagRule) -> Bool {
+        return lhs.outerBagColor == rhs.outerBagColor
+    }
 }
 
 public struct Solver {
     public static func solveFirst(input: [BagRule], key: String) -> Int {
-
+        let allParents = findAllParents(of: key, in: input)
+        return Set<BagRule>(allParents).count
     }
 
-    private func find(rules: [BagRule], containing color: String) -> [BagRule] {
-        rules.filter { $0.innerBags.map(\.color).contains(color) }
+    public static func solveSecond(input: [BagRule], key: String) -> Int {
+        let lookup: [String : [BagRule.InnerBag]] = input.reduce(into: [:]) { result, rule in
+            result[rule.outerBagColor] = rule.innerBags
+        }
+        return countAllChildren(of: key, in: lookup)
+    }
+
+    private static func findAllParents(of key: String, in rules: [BagRule]) -> [BagRule] {
+        let results = rules.filter { $0.innerBags.map(\.color).contains(key) }
+        let childResults = results.map { findAllParents(of: $0.outerBagColor, in: rules) }
+        return results + childResults.flatMap { $0 }
+    }
+
+    private static func countAllChildren(of key: String, in lookup: [String : [BagRule.InnerBag]]) -> Int {
+        let bags = lookup[key, default:[]]
+        guard !bags.isEmpty else { return 0 }
+        return bags.reduce(0) { result, bag in
+            let childCount = countAllChildren(of: bag.color, in: lookup)
+            return result + bag.count * (childCount + 1)
+        }
     }
 }
