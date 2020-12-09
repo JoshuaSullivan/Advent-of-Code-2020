@@ -7,4 +7,4 @@ import Foundation
 let input = try! DataParser<Int>().parseLines(fileName: "input")
 
 print("First: \(Solver.solveFirst(input: input, preambleSize: 25))")
-
+print("Second: \(Solver.solveSecond(input: input, target: 177777905))")
