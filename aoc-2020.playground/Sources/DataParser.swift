@@ -78,13 +78,27 @@ public struct DataParser<T: StringInitable> {
             .split(separator: "❤️")
             .map { $0.split(separator: "\n").compactMap { T(String($0)) } }
     }
+    
+    public func parseLinesOfCharacters(fileName: String) throws -> [[T]] {
+        return try loadDataString(from: fileName)
+            .split(separator: "\n")
+            .map { $0.compactMap { T(String($0)) } }
+    }
 
     /// Attempt to load the input file from the Resources folder.
     ///
-    private func loadDataString(from fileName: String) throws -> String {
+    public func loadDataString(from fileName: String) throws -> String {
         guard let dataURL = Bundle.main.url(forResource: fileName, withExtension: nil) else {
             throw Error.unableToReadInput
         }
         return try String(contentsOf: dataURL)
+    }
+    
+    public func parseCSVWithNil(fileName: String) throws -> [T?] {
+        return try loadDataString(from: fileName)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .map { T($0) }
     }
 }

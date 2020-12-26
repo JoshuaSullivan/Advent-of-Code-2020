@@ -99,7 +99,6 @@ public struct Passport: StringInitable {
     var hasRequiredFields: Bool {
 
         let requiredFields: [Field.FieldType] = [.byr, .iyr, .eyr, .hgt, .hcl, .ecl, .pid]
-        let optionalFields: [Field.FieldType] = [.cid]
 
         let fieldIds = fields.map { $0.fieldType }
         return requiredFields.allSatisfy { fieldIds.contains($0) }
